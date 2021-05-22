@@ -7,7 +7,6 @@
 
 import SwiftUI
 import CoreData
-import ASCollectionView
 
 struct MoveToView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -18,34 +17,21 @@ struct MoveToView: View {
     @State var currentLocation: Item
     @State private var showingConfirmationAlert = false
 
-    enum Section { case containers }
-
     var body: some View {
-        ASCollectionView {
-            ASCollectionViewSection<Section>(
-                id: .containers,
-                data: currentLocation.containers
-            ) { item, _ in
-                NavigationLink(destination: MoveToView(
-                    isPresented: $isPresented,
-                    movingItem: movingItem,
-                    currentLocation: item
-                )) {
-                    ContainerView(item: item)
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 165))]) {
+                ForEach(currentLocation.containers) { item in
+                    NavigationLink(destination: MoveToView(
+                        isPresented: $isPresented,
+                        movingItem: movingItem,
+                        currentLocation: item
+                    )) {
+                        ContainerView(item: item)
+                    }
                 }
             }
+            .padding(EdgeInsets(top: 15, leading: 15, bottom: 0, trailing: 15))
         }
-        .layout{
-            .grid(
-                layoutMode: .adaptive(withMinItemSize: 165),
-                itemSpacing: 10,
-                lineSpacing: 10,
-                itemSize: .estimated(90)
-            )
-        }
-        .contentInsets(.init(top: 20, left: 0, bottom: 20, right: 0))
-        .alwaysBounceVertical()
-        .edgesIgnoringSafeArea(.all)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarTitle(currentLocation.wrappedName)
         .navigationBarItems(
@@ -73,5 +59,41 @@ struct MoveToView: View {
                 }
             )
         }
+    }
+}
+
+struct MoveToView_Previews: PreviewProvider {
+    static var previews: some View {
+        let context = PersistenceController.shared.container.viewContext
+        let base = Item.init(context: context)
+        base.timestamp = Date()
+        base.name = "Base item"
+        base.isContainer = true
+
+        let item = Item.init(context: context)
+        item.timestamp = Date()
+        item.name = "Test item 1"
+        item.isContainer = false
+        item.parent = base
+
+        let group1 = Item.init(context: context)
+        group1.timestamp = Date()
+        group1.name = "Test group 1"
+        group1.isContainer = true
+        group1.parent = base
+
+        let group2 = Item.init(context: context)
+        group2.timestamp = Date()
+        group2.name = "Test group 2"
+        group2.isContainer = true
+        group2.parent = base
+
+        return NavigationView {
+            MoveToView(
+                isPresented: .constant(nil),
+                movingItem: item,
+                currentLocation: base
+            )
+        }.environment(\.managedObjectContext, context)
     }
 }

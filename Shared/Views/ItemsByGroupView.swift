@@ -7,7 +7,6 @@
 
 import SwiftUI
 import CoreData
-import ASCollectionView
 import Introspect
 
 struct ItemsByGroupView: View {
@@ -32,94 +31,66 @@ struct ItemsByGroupView: View {
 
     @State private var itemToDelete: Item?
 
-    enum Section { case items, containers }
-
     var body: some View {
-//            List {
-//                ForEach(item.childrenArray) { item in
-//                    if item.isContainer {
-//                        NavigationLink(
-//                            destination: ItemsByGroupView(item: item)
-//                        ) {
-//                            Text(item.name!)
-//                        }
-//                    } else {
-//                        Text(item.name!)
-//                    }
-//                }
-//                .onDelete(perform: deleteItems)
-//            }
-        ASCollectionView {
-            ASCollectionViewSection<Section>(
-                id: .containers,
-                data: item.containers
-            ) { item, _ in
-                NavigationLink(destination: ItemsByGroupView(item: item)) {
-                    ContainerView(item: item)
-                }
-                .contextMenu {
-                    Button {
-                        print("pressed")
-                    } label: {
-                        Label("Edit", systemImage: "pencil")
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 165))]) {
+                ForEach(item.containers) { item in
+                    NavigationLink(destination: ItemsByGroupView(item: item)) {
+                        ContainerView(item: item)
                     }
-                    Button {
-                        activeSheet = .move(item: item, base: item.path[0])
-                    } label: {
-                        Label("Move", systemImage: "arrow.2.squarepath")
-                    }
-                    Divider()
-                    Button {
-                        itemToDelete = item
-                        showingDeleteAlert = true
-                    } label: {
-                        Label("Delete", systemImage: "trash")
+                    .contentShape(RoundedRectangle(cornerRadius: 15))
+                    .contextMenu {
+                        Button {
+                            print("pressed")
+                        } label: {
+                            Label("Edit", systemImage: "pencil")
+                        }
+                        Button {
+                            activeSheet = .move(item: item, base: item.path[0])
+                        } label: {
+                            Label("Move", systemImage: "arrow.2.squarepath")
+                        }
+                        Divider()
+                        Button {
+                            itemToDelete = item
+                            showingDeleteAlert = true
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
                     }
                 }
             }
-            ASCollectionViewSection<Section>(
-                id: .items,
-                data: item.items
-            ) { item, context in
-                VStack(spacing: 0) {
-                    ItemView(item: item)
-                        .contextMenu {
-                            Button {
-                                print("pressed")
-                            } label: {
-                                Label("Edit", systemImage: "pencil")
+            .padding(EdgeInsets(top: 15, leading: 15, bottom: 0, trailing: 15))
+
+            LazyVGrid(columns: [GridItem(.flexible())], spacing: 0) {
+                Section(header: GridHeader(), footer: GridFooter()) {
+                    ForEach(item.items) { item in
+                        ItemView(item: item)
+                            .contextMenu {
+                                Button {
+                                    print("pressed")
+                                } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }
+                                Button {
+                                    activeSheet = .move(item: item, base: item.path[0])
+                                } label: {
+                                    Label("Move", systemImage: "arrow.2.squarepath")
+                                }
+                                Divider()
+                                Button {
+                                    itemToDelete = item
+                                    showingDeleteAlert = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
                             }
-                            Button {
-                                activeSheet = .move(item: item, base: item.path[0])
-                            } label: {
-                                Label("Move", systemImage: "arrow.2.squarepath")
-                            }
-                            Divider()
-                            Button {
-                                itemToDelete = item
-                                showingDeleteAlert = true
-                            } label: {
-                                Label("Delete", systemImage: "trash")
-                            }
-                        }
-                    if !context.isLastInSection {
                         Divider()
                     }
                 }
             }
-            .sectionHeader {
-                Text("Loose Items")
-                    .font(.headline)
-                    .bold()
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .sectionFooter { Text("") }
+            .padding(15)
         }
-        .layout(layout)
-        .contentInsets(.init(top: 20, left: 0, bottom: 20, right: 0))
-        .alwaysBounceVertical()
-        .edgesIgnoringSafeArea(.all)
         .navigationBarTitle(item.wrappedName)
         .navigationBarItems(trailing:
             Button {
@@ -198,74 +169,6 @@ struct ItemsByGroupView: View {
             }
         }
     }
-
-    let groupBackgroundId = UUID().uuidString
-
-    var layout: ASCollectionLayout<Section> {
-        ASCollectionLayout<Section>(interSectionSpacing: 20) { id in
-            switch id {
-                case .containers:
-                    return .grid(
-                        layoutMode: .adaptive(withMinItemSize: 165),
-                        itemSpacing: 10,
-                        lineSpacing: 10,
-                        itemSize: .estimated(90)
-                    )
-                case .items:
-                    return ASCollectionLayoutSection {
-                        let itemSize = NSCollectionLayoutSize(
-                            widthDimension: .fractionalWidth(1),
-                            heightDimension: .estimated(60)
-                        )
-                        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                        let groupSize = NSCollectionLayoutSize(
-                            widthDimension: .fractionalWidth(1),
-                            heightDimension: .estimated(60)
-                        )
-                        let group = NSCollectionLayoutGroup
-                            .horizontal(
-                                layoutSize: groupSize,
-                                subitems: [item]
-                            )
-                        let section = NSCollectionLayoutSection(group: group)
-                        section.contentInsets = NSDirectionalEdgeInsets(
-                            top: 0, leading: 20,
-                            bottom: 0, trailing: 20
-                        )
-                        let supplementarySize = NSCollectionLayoutSize(
-                            widthDimension: .fractionalWidth(1),
-                            heightDimension: .estimated(50)
-                        )
-                        let headerSupplementary = NSCollectionLayoutBoundarySupplementaryItem(
-                            layoutSize: supplementarySize,
-                            elementKind: UICollectionView.elementKindSectionHeader,
-                            alignment: .top)
-                        let footerSupplementary = NSCollectionLayoutBoundarySupplementaryItem(
-                            layoutSize: supplementarySize,
-                            elementKind: UICollectionView.elementKindSectionFooter,
-                            alignment: .bottom
-                        )
-                        section.boundarySupplementaryItems = [headerSupplementary, footerSupplementary]
-                        let sectionBackgroundDecoration = NSCollectionLayoutDecorationItem
-                            .background(elementKind: groupBackgroundId)
-                        sectionBackgroundDecoration.contentInsets = section.contentInsets
-                        section.decorationItems = [sectionBackgroundDecoration]
-                        return section
-                    }
-            }
-        }
-        .decorationView(
-            GroupBackground.self,
-            forDecorationViewOfKind: groupBackgroundId
-        )
-    }
-}
-
-struct GroupBackground: View, Decoration {
-    var body: some View {
-        RoundedRectangle(cornerRadius: 12)
-            .fill(Color(.systemGray5))
-    }
 }
 
 private let itemFormatter: DateFormatter = {
@@ -274,3 +177,41 @@ private let itemFormatter: DateFormatter = {
     formatter.timeStyle = .medium
     return formatter
 }()
+
+struct ItemsByGroupView_Previews: PreviewProvider {
+    static var previews: some View {
+        let context = PersistenceController.shared.container.viewContext
+        let base = Item.init(context: context)
+        base.timestamp = Date()
+        base.name = "Base item"
+        base.isContainer = true
+
+        let item1 = Item.init(context: context)
+        item1.timestamp = Date()
+        item1.name = "Test item 1"
+        item1.isContainer = false
+        item1.parent = base
+
+        let item2 = Item.init(context: context)
+        item2.timestamp = Date()
+        item2.name = "Test item 2"
+        item2.isContainer = false
+        item2.parent = base
+
+        let group1 = Item.init(context: context)
+        group1.timestamp = Date()
+        group1.name = "Test group 1"
+        group1.isContainer = true
+        group1.parent = base
+
+        let group2 = Item.init(context: context)
+        group2.timestamp = Date()
+        group2.name = "Test group 2"
+        group2.isContainer = true
+        group2.parent = base
+
+        return NavigationView {
+            ItemsByGroupView(item: base)
+        }.environment(\.managedObjectContext, context)
+    }
+}

@@ -62,10 +62,13 @@ struct InventauriApp: App {
                     persistenceController.container.viewContext
                 )
                 .tabItem {
+                    Image(systemName: "circle.grid.cross.fill")
                     Text("My Groups")
                 }
 
-                AllItems()
+                NavigationView {
+                    AllItemsView()
+                }
                 .environment(
                     \.managedObjectContext,
                     persistenceController.container.viewContext
