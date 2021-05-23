@@ -7,12 +7,17 @@
 
 import SwiftUI
 import CoreData
-import Camera_SwiftUI
 import Introspect
 
 struct NewItemView: View {
     enum ActiveSheet: Identifiable {
         case picker, camera
+
+        var id: Int { hashValue }
+    }
+
+    enum ActiveAlert: Identifiable {
+        case cancel, save, clearImage
 
         var id: Int { hashValue }
     }
@@ -23,114 +28,121 @@ struct NewItemView: View {
     @State var isAddingContainer: Bool
 
     @State var parent: Item
-    @State private var showingCancelAlert = false
-    @State private var showingSaveAlert = false
+    
+    @State private var showingActionSheet = false
     @State private var activeSheet: ActiveSheet?
+    @State private var activeAlert: ActiveAlert?
 
     @State private var itemName = ""
     @State private var imageData: Data?
 
     var body: some View {
         NavigationView {
-            Group {
+            Form {
                 TextField("Name", text: $itemName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
                 HStack {
-                    VStack {
-                        Button {
-                            activeSheet = .camera
-                        } label: {
-                            Text("Take Picture")
-                        }
-                        .foregroundColor(.accentColor)
-                        .padding()
-                        .background(Color.white)
-                        .cornerRadius(8)
-
-                        Button {
-                            activeSheet = .picker
-                        } label: {
-                            Text("Choose Picture")
-                        }
-                        .foregroundColor(.accentColor)
-                        .padding()
-                        .background(Color.white)
-                        .cornerRadius(8)
-                    }
-
                     Button {
                         print("glyph")
                     } label: {
-                        Text("Choose Glyph")
+                        Text("Glyph")
                     }
-                    .foregroundColor(.accentColor)
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(8)
                 }
-                if let imageData = imageData, let uiImage = UIImage(data: imageData) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .frame(width: 300, height: 300)
+
+                HStack {
+                    Button {
+                        showingActionSheet = true
+                    } label: {
+                        Text("Image")
+                    }
+
+                    Divider().frame(width: 5)
+
+                    if let imageData = imageData, let uiImage = UIImage(data: imageData) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFit()
+                    }
                 }
-                Spacer()
+
+                if imageData != nil {
+                    HStack {
+                        Spacer()
+                        Button {
+                            activeAlert = .clearImage
+                        } label: {
+                            Text("Remove Image")
+                        }
+                        Spacer()
+                    }
+                }
             }
-            .padding()
-            .background(Color(.systemGray6))
             .navigationBarTitle(Text("New \(isAddingContainer ? "Group" : "Item")"))
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(
                 leading: Button {
-                    showingCancelAlert = true
+                    activeAlert = .cancel
                 } label: {
                     Text("Cancel")
-                }
-                .alert(isPresented: $showingCancelAlert) {
-                    Alert(
-                        title: Text("Exit adding item?"),
-                        message: Text("You will lose all entered information."),
-                        primaryButton: .cancel(),
-                        secondaryButton: .destructive(Text("Exit")) {
-                            presentationMode.wrappedValue.dismiss()
-                        }
-                    )
                 },
                 trailing: Button {
                     guard itemName.trimmingCharacters(in: .whitespacesAndNewlines) != "" else { return }
-                    showingSaveAlert = true
+                    activeAlert = .save
                 } label: {
                     Text("Add")
                 }
-                .alert(isPresented: $showingSaveAlert) {
-                    Alert(
-                        title: Text("Save item?"),
-                        message: Text("This will save the item into the current group."),
-                        primaryButton: .cancel(),
-                        secondaryButton: .default(Text("Save")) {
+            )
+            .actionSheet(isPresented: $showingActionSheet) {
+                ActionSheet(
+                    title: Text("Choose image"),
+                    buttons: [
+                        .default(Text("Choose from library")) {
+                            activeSheet = .picker
+                        },
+                        .default(Text("Take new photo")) {
+                            activeSheet = .camera
+                        },
+                        .cancel()
+                    ]
+                )
+            }
+            .sheet(item: $activeSheet) { _ in
+                ImagePickerView(isShown: $activeSheet, image: $imageData)
+                    .introspectViewController { view in
+                        view.isModalInPresentation = true
+                    }
+            }
+            .alert(item: $activeAlert) { alert in
+                let title: String
+                let message: String
+                let secondaryButton: Alert.Button
+                switch alert {
+                    case .cancel:
+                        title = "Exit adding item?"
+                        message = "You will lose all entered information."
+                        secondaryButton = .destructive(Text("Exit")) {
+                            presentationMode.wrappedValue.dismiss()
+                        }
+                    case .save:
+                        title = "Save item?"
+                        message = "This will save the item into the current group."
+                        secondaryButton = .default(Text("Save")) {
                             addItem()
                             presentationMode.wrappedValue.dismiss()
                         }
-                    )
-                }
-            )
-            .sheet(item: $activeSheet) { sheet in
-                switch sheet {
-                    case .camera:
-                        NavigationView {
-                            CameraView(
-                                isShown: $activeSheet,
-                                image: $imageData
-                            )
+                    case .clearImage:
+                        title = "Remove image?"
+                        message = "This will clear the currently assigned image."
+                        secondaryButton = .destructive(Text("Remove")) {
+                            imageData = nil
                         }
-                        .introspectViewController { view in
-                            view.isModalInPresentation = true
-                        }
-                    case .picker: 
-                        ImagePickerView(
-                            isShown: $activeSheet,
-                            image: $imageData
-                        )
                 }
+                return Alert(
+                    title: Text(title),
+                    message: Text(message),
+                    primaryButton: .cancel(),
+                    secondaryButton: secondaryButton
+                )
             }
         }
     }
@@ -154,5 +166,21 @@ struct NewItemView: View {
             }
             presentationMode.wrappedValue.dismiss()
         }
+    }
+}
+
+struct NewItemView_Previews: PreviewProvider {
+    static var previews: some View {
+        let context = PersistenceController.preview.container.viewContext
+        let fetchRequest = NSFetchRequest<Item>(entityName: "Item")
+        fetchRequest.fetchLimit = 1
+        fetchRequest.predicate = NSPredicate(
+            format: "id == %@",
+            Constants.inventauriBaseID as CVarArg
+        )
+        let base = try! context.fetch(fetchRequest).first!
+
+        return NewItemView(isAddingContainer: false, parent: base)
+            .environment(\.managedObjectContext, context)
     }
 }

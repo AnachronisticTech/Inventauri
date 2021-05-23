@@ -180,35 +180,14 @@ private let itemFormatter: DateFormatter = {
 
 struct ItemsByGroupView_Previews: PreviewProvider {
     static var previews: some View {
-        let context = PersistenceController.shared.container.viewContext
-        let base = Item.init(context: context)
-        base.timestamp = Date()
-        base.name = "Base item"
-        base.isContainer = true
-
-        let item1 = Item.init(context: context)
-        item1.timestamp = Date()
-        item1.name = "Test item 1"
-        item1.isContainer = false
-        item1.parent = base
-
-        let item2 = Item.init(context: context)
-        item2.timestamp = Date()
-        item2.name = "Test item 2"
-        item2.isContainer = false
-        item2.parent = base
-
-        let group1 = Item.init(context: context)
-        group1.timestamp = Date()
-        group1.name = "Test group 1"
-        group1.isContainer = true
-        group1.parent = base
-
-        let group2 = Item.init(context: context)
-        group2.timestamp = Date()
-        group2.name = "Test group 2"
-        group2.isContainer = true
-        group2.parent = base
+        let context = PersistenceController.preview.container.viewContext
+        let fetchRequest = NSFetchRequest<Item>(entityName: "Item")
+        fetchRequest.fetchLimit = 1
+        fetchRequest.predicate = NSPredicate(
+            format: "id == %@",
+            Constants.inventauriBaseID as CVarArg
+        )
+        let base = try! context.fetch(fetchRequest).first!
 
         return NavigationView {
             ItemsByGroupView(item: base)

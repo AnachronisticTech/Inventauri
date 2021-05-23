@@ -22,6 +22,8 @@ extension ImagePickerView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.delegate = context.coordinator
+        picker.sourceType = isShown == .picker ? .photoLibrary : .camera
+        picker.allowsEditing = true
         return picker
     }
 
@@ -47,10 +49,30 @@ class ImageCaptureViewCoordinator:
         _ picker: UIImagePickerController,
         didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]
     ) {
-        guard let unwrappedImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage else { return }
-//        imageInCoordinator = Image(uiImage: unwrappedImage)
-        imageInCoordinator = unwrappedImage.pngData()
-        isCoordinatorShown = nil
+        defer { isCoordinatorShown = nil }
+
+        guard var unwrappedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage else { return }
+
+        if unwrappedImage.imageOrientation != .up {
+            UIGraphicsBeginImageContextWithOptions(unwrappedImage.size, false, unwrappedImage.scale)
+            unwrappedImage.draw(in: CGRect(x: 0, y: 0, width: unwrappedImage.size.width, height: unwrappedImage.size.height))
+            unwrappedImage = UIGraphicsGetImageFromCurrentImageContext() ?? unwrappedImage
+            UIGraphicsEndImageContext()
+        }
+
+        guard let image = unwrappedImage.cgImage else { return }
+        var x = 0
+        var y = 0
+        let size = min(image.width, image.height)
+
+        if image.height > image.width {
+            y = (image.height - size) / 2
+        } else {
+            x = (image.width - size) / 2
+        }
+
+        guard let cropped = image.cropping(to: CGRect(x: x, y: y, width: size, height: size)) else { return }
+        imageInCoordinator = UIImage(cgImage: cropped).pngData()
     }
 
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {

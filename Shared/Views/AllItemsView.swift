@@ -30,7 +30,7 @@ struct AllItemsView: View {
                     }
                 }
             }
-            .padding(EdgeInsets(top: 0, leading: 15, bottom: 15, trailing: 15))
+            .padding(15)
         }
         .navigationBarTitle("All Items")
         .navigationBarTitleDisplayMode(.automatic)
@@ -55,41 +55,7 @@ struct AllItemsView: View {
 
 struct AllItemsView_Previews: PreviewProvider {
     static var previews: some View {
-        let context = PersistenceController.shared.container.viewContext
-        let base = Item.init(context: context)
-        base.timestamp = Date()
-        base.name = "Base item"
-        base.isContainer = true
-
-//        let group1 = Item.init(context: context)
-//        group1.timestamp = Date()
-//        group1.name = "Test group 1"
-//        group1.isContainer = true
-//        group1.parent = base
-
-//        let group2 = Item.init(context: context)
-//        group2.timestamp = Date()
-//        group2.name = "Test group 2"
-//        group2.isContainer = true
-//        group2.parent = base
-
-        let item1 = Item.init(context: context)
-        item1.timestamp = Date()
-        item1.name = "Test item 1"
-        item1.isContainer = false
-        item1.parent = base
-
-//        let item2 = Item.init(context: context)
-//        item2.timestamp = Date()
-//        item2.name = "Test item 2"
-//        item2.isContainer = false
-//        item2.parent = group1
-
-//        let item3 = Item.init(context: context)
-//        item3.timestamp = Date()
-//        item3.name = "Test item 3"
-//        item3.isContainer = false
-//        item3.parent = group2
+        let context = PersistenceController.preview.container.viewContext
 
         return NavigationView {
             AllItemsView()
