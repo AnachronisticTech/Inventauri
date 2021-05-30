@@ -17,6 +17,8 @@ struct InventauriApp: App {
     let persistenceController = PersistenceController.shared
     let base: Item
 
+    @State var selectedTab = 0
+
     init() {
         let fetchRequest = NSFetchRequest<Item>(entityName: "Item")
         fetchRequest.fetchLimit = 1
@@ -41,14 +43,10 @@ struct InventauriApp: App {
                 fatalError("Could not retrieve or create base container")
             }
             self.base = baseItem
-//            print("all initialised fine!")
             return
         }
         self.base = base
-//        print("all initialised fine!")
     }
-
-    @State var selectedTab = 0
 
     var body: some Scene {
         WindowGroup {

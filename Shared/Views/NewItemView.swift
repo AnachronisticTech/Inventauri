@@ -42,18 +42,14 @@ struct NewItemView: View {
                 TextField("Name", text: $itemName)
 
                 HStack {
-                    Button {
+                    Button("Glyph") {
                         print("glyph")
-                    } label: {
-                        Text("Glyph")
                     }
                 }
 
                 HStack {
-                    Button {
+                    Button("Image") {
                         showingActionSheet = true
-                    } label: {
-                        Text("Image")
                     }
 
                     Divider().frame(width: 5)
@@ -68,10 +64,8 @@ struct NewItemView: View {
                 if imageData != nil {
                     HStack {
                         Spacer()
-                        Button {
+                        Button("Remove Image") {
                             activeAlert = .clearImage
-                        } label: {
-                            Text("Remove Image")
                         }
                         Spacer()
                     }
@@ -80,16 +74,12 @@ struct NewItemView: View {
             .navigationBarTitle(Text("New \(isAddingContainer ? "Group" : "Item")"))
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(
-                leading: Button {
+                leading: Button("Cancel") {
                     activeAlert = .cancel
-                } label: {
-                    Text("Cancel")
                 },
-                trailing: Button {
+                trailing: Button("Add") {
                     guard itemName.trimmingCharacters(in: .whitespacesAndNewlines) != "" else { return }
                     activeAlert = .save
-                } label: {
-                    Text("Add")
                 }
             )
             .actionSheet(isPresented: $showingActionSheet) {
