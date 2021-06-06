@@ -24,7 +24,7 @@ struct ContainerView: View {
                     .foregroundColor(Color(.label))
                     .bold()
             }
-            Text(item.wrappedName)
+            Text(item.name)
                 .bold()
                 .multilineTextAlignment(.center)
                 .foregroundColor(Color(.secondaryLabel))

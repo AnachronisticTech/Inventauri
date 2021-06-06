@@ -25,21 +25,33 @@ struct NewItemView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.presentationMode) private var presentationMode
 
-    @State var isAddingContainer: Bool
+    @StateObject var item: Item
+    @State var parentId: UUID?
 
-    @State var parent: Item
+    init(creatingItem item: Item, withParentId parentId: UUID) {
+        item.isContainer = false
+        self._parentId = State(wrappedValue: parentId)
+        self._item = StateObject(wrappedValue: item)
+    }
+
+    init(creatingGroup item: Item, withParentId parentId: UUID) {
+        item.isContainer = true
+        self._parentId = State(wrappedValue: parentId)
+        self._item = StateObject(wrappedValue: item)
+    }
+
+    init(modifying item: Item) {
+        self._item = StateObject(wrappedValue: item)
+    }
     
     @State private var showingActionSheet = false
     @State private var activeSheet: ActiveSheet?
     @State private var activeAlert: ActiveAlert?
 
-    @State private var itemName = ""
-    @State private var imageData: Data?
-
     var body: some View {
         NavigationView {
             Form {
-                TextField("Name", text: $itemName)
+                TextField("Name", text: $item.name)
 
                 HStack {
                     Button("Glyph") {
@@ -54,14 +66,14 @@ struct NewItemView: View {
 
                     Divider().frame(width: 5)
 
-                    if let imageData = imageData, let uiImage = UIImage(data: imageData) {
+                    if let imageData = item.image, let uiImage = UIImage(data: imageData) {
                         Image(uiImage: uiImage)
                             .resizable()
                             .scaledToFit()
                     }
                 }
 
-                if imageData != nil {
+                if item.image != nil {
                     HStack {
                         Spacer()
                         Button("Remove Image") {
@@ -71,14 +83,17 @@ struct NewItemView: View {
                     }
                 }
             }
-            .navigationBarTitle(Text("New \(isAddingContainer ? "Group" : "Item")"))
+            .navigationBarTitle(
+                Text(parentId != nil ? "New " : "Edit ") +
+                Text(item.isContainer ? "Group" : "Item")
+            )
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(
                 leading: Button("Cancel") {
                     activeAlert = .cancel
                 },
-                trailing: Button("Add") {
-                    guard itemName.trimmingCharacters(in: .whitespacesAndNewlines) != "" else { return }
+                trailing: Button("Save") {
+                    guard item.name.trimmingCharacters(in: .whitespacesAndNewlines) != "" else { return }
                     activeAlert = .save
                 }
             )
@@ -97,7 +112,7 @@ struct NewItemView: View {
                 )
             }
             .sheet(item: $activeSheet) { _ in
-                ImagePickerView(isShown: $activeSheet, image: $imageData)
+                ImagePickerView(isShown: $activeSheet, image: $item.image)
                     .introspectViewController { view in
                         view.isModalInPresentation = true
                     }
@@ -108,13 +123,14 @@ struct NewItemView: View {
                 let secondaryButton: Alert.Button
                 switch alert {
                     case .cancel:
-                        title = "Exit adding item?"
+                        title = "Discard these changes?"
                         message = "You will lose all entered information."
-                        secondaryButton = .destructive(Text("Exit")) {
+                        secondaryButton = .destructive(Text("Discard")) {
+                            viewContext.rollback()
                             presentationMode.wrappedValue.dismiss()
                         }
                     case .save:
-                        title = "Save item?"
+                        title = "Save?"
                         message = "This will save the item into the current group."
                         secondaryButton = .default(Text("Save")) {
                             addItem()
@@ -124,7 +140,7 @@ struct NewItemView: View {
                         title = "Remove image?"
                         message = "This will clear the currently assigned image."
                         secondaryButton = .destructive(Text("Remove")) {
-                            imageData = nil
+                            item.image = nil
                         }
                 }
                 return Alert(
@@ -139,12 +155,20 @@ struct NewItemView: View {
 
     private func addItem() {
         withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-            newItem.name = itemName.trimmingCharacters(in: .whitespacesAndNewlines)
-            newItem.isContainer = isAddingContainer
-            newItem.parent = parent
-            newItem.image = imageData
+            item.name = item.name
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            if item.timestamp == nil {
+                item.timestamp = Date()
+            }
+            if let id = parentId, item.parent == nil {
+                let fetchRequest = NSFetchRequest<Item>(entityName: "Item")
+                fetchRequest.fetchLimit = 1
+                fetchRequest.predicate = NSPredicate(
+                    format: "id == %@",
+                    id as CVarArg
+                )
+                item.parent = try? viewContext.fetch(fetchRequest).first!
+            }
 
             do {
                 try viewContext.save()
@@ -170,7 +194,10 @@ struct NewItemView_Previews: PreviewProvider {
         )
         let base = try! context.fetch(fetchRequest).first!
 
-        return NewItemView(isAddingContainer: false, parent: base)
+        let item = Item(context: context)
+        item.parent = base
+        item.timestamp = Date()
+        return NewItemView(creatingItem: item, withParentId: base.id!)
             .environment(\.managedObjectContext, context)
     }
 }

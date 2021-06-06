@@ -24,7 +24,7 @@ struct AllItemsView: View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.flexible())], spacing: 0) {
                 Section(header: GridHeader(), footer: GridFooter()) {
-                    ForEach(items.filter { $0.wrappedName.starts(with: text) }) { item in
+                    ForEach(items.filter { $0.name.starts(with: text) }) { item in
                         ItemView(item: item, showingPath: true)
                         Divider()
                     }

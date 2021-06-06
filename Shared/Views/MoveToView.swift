@@ -33,7 +33,7 @@ struct MoveToView: View {
             .padding(EdgeInsets(top: 15, leading: 15, bottom: 0, trailing: 15))
         }
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarTitle(currentLocation.wrappedName)
+        .navigationBarTitle(currentLocation.name)
         .navigationBarItems(
             leading: Button("Cancel") {
                 isPresented = nil

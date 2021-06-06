@@ -43,7 +43,7 @@ struct ItemView: View {
                 .padding()
             }
             VStack(alignment: .leading) {
-                Text(item.wrappedName)
+                Text(item.name)
                     .multilineTextAlignment(.leading)
                     .foregroundColor(Color(.label))
                 if showingPath {

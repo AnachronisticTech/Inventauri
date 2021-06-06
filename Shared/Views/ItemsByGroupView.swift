@@ -11,12 +11,15 @@ import Introspect
 
 struct ItemsByGroupView: View {
     enum ActiveSheet: Identifiable {
-        case add, move(item: Item, base: Item)
+        case add(isContainer: Bool = false)
+        case move(item: Item, base: Item)
+        case edit(item: Item)
 
         var id: Int {
             switch self {
-                case .add: return 0
+                case .add(_): return 0
                 case .move(_, _): return 1
+                case .edit(_): return 2
             }
         }
     }
@@ -26,7 +29,6 @@ struct ItemsByGroupView: View {
 
     @State private var showingActionSheet = false
     @State private var showingDeleteAlert = false
-    @State private var isAddingContainer = false
     @State private var activeSheet: ActiveSheet?
 
     @State private var itemToDelete: Item?
@@ -41,7 +43,7 @@ struct ItemsByGroupView: View {
                     .contentShape(RoundedRectangle(cornerRadius: 15))
                     .contextMenu {
                         Button {
-                            print("pressed")
+                            activeSheet = .edit(item: item)
                         } label: {
                             Label("Edit", systemImage: "pencil")
                         }
@@ -68,7 +70,7 @@ struct ItemsByGroupView: View {
                         ItemView(item: item)
                             .contextMenu {
                                 Button {
-                                    print("pressed")
+                                    activeSheet = .edit(item: item)
                                 } label: {
                                     Label("Edit", systemImage: "pencil")
                                 }
@@ -91,7 +93,7 @@ struct ItemsByGroupView: View {
             }
             .padding(15)
         }
-        .navigationBarTitle(item.wrappedName)
+        .navigationBarTitle(item.name)
         .navigationBarItems(trailing:
             Button {
                 showingActionSheet = true
@@ -104,12 +106,10 @@ struct ItemsByGroupView: View {
                 title: Text("What would you like to add?"),
                 buttons: [
                     .default(Text("Add new item")) {
-                        activeSheet = .add
-                        isAddingContainer = false
+                        activeSheet = .add()
                     },
                     .default(Text("Add new group")) {
-                        activeSheet = .add
-                        isAddingContainer = true
+                        activeSheet = .add(isContainer: true)
                     },
                     .cancel()
                 ]
@@ -117,15 +117,30 @@ struct ItemsByGroupView: View {
         }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
-                case .add:
+                case .add(true):
                     NewItemView(
-                        isAddingContainer: isAddingContainer,
-                        parent: item
+                        creatingGroup: Item(context: viewContext),
+                        withParentId: item.id!
                     )
                     .environment(\.managedObjectContext, viewContext)
                     .introspectViewController { view in
                         view.isModalInPresentation = true
                     }
+                case .add(false):
+                    NewItemView(
+                        creatingItem: Item(context: viewContext),
+                        withParentId: item.id!
+                    )
+                    .environment(\.managedObjectContext, viewContext)
+                    .introspectViewController { view in
+                        view.isModalInPresentation = true
+                    }
+                case .edit(let item):
+                    NewItemView(modifying: item)
+                        .environment(\.managedObjectContext, viewContext)
+                        .introspectViewController { view in
+                            view.isModalInPresentation = true
+                        }
                 case .move(let itemToMove, let base):
                     NavigationView {
                         MoveToView(

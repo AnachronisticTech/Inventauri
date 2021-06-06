@@ -18,10 +18,11 @@ extension Item {
     public override func awakeFromInsert() {
         super.awakeFromInsert()
         id = UUID()
+        setPrimitiveValue("", forKey: "name")
     }
 
     @NSManaged public var timestamp: Date?
-    @NSManaged public var name: String?
+    @NSManaged public var name: String
     @NSManaged public var id: UUID?
     @NSManaged public var isContainer: Bool
     @NSManaged public var image: Data?
@@ -29,26 +30,26 @@ extension Item {
     @NSManaged public var parent: Item?
     @NSManaged public var children: NSSet?
 
-    public var wrappedName: String { name ?? "" }
+//    public var wrappedName: String { name ?? "" }
 
     public var all: [Item] {
         let set = children as? Set<Item> ?? []
         return set
-            .sorted { $0.wrappedName < $1.wrappedName }
+            .sorted { $0.name < $1.name }
     }
 
     public var items: [Item] {
         let set = children as? Set<Item> ?? []
         return set
             .filter { !$0.isContainer }
-            .sorted { $0.wrappedName < $1.wrappedName }
+            .sorted { $0.name < $1.name }
     }
 
     public var containers: [Item] {
         let set = children as? Set<Item> ?? []
         return set
             .filter { $0.isContainer }
-            .sorted { $0.wrappedName < $1.wrappedName }
+            .sorted { $0.name < $1.name }
     }
 
     public var path: [Item] {
@@ -62,7 +63,7 @@ extension Item {
     }
     
     public var pathString: String {
-        var list = path.dropFirst(1).map(\.wrappedName)
+        var list = path.dropFirst(1).map(\.name)
         list.append("Loose Items")
         return list.joined(separator: " > ")
     }
