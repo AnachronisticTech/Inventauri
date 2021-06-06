@@ -118,7 +118,7 @@ struct ItemsByGroupView: View {
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
                 case .add(true):
-                    NewItemView(
+                    ItemEditFormView(
                         creatingGroup: Item(context: viewContext),
                         withParentId: item.id!
                     )
@@ -127,7 +127,7 @@ struct ItemsByGroupView: View {
                         view.isModalInPresentation = true
                     }
                 case .add(false):
-                    NewItemView(
+                    ItemEditFormView(
                         creatingItem: Item(context: viewContext),
                         withParentId: item.id!
                     )
@@ -136,7 +136,7 @@ struct ItemsByGroupView: View {
                         view.isModalInPresentation = true
                     }
                 case .edit(let item):
-                    NewItemView(modifying: item)
+                    ItemEditFormView(modifying: item)
                         .environment(\.managedObjectContext, viewContext)
                         .introspectViewController { view in
                             view.isModalInPresentation = true

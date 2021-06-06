@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ImagePickerView: View {
-    @Binding var isShown: NewItemView.ActiveSheet?
+    @Binding var isShown: ItemEditFormView.ActiveSheet?
     @Binding var image: Data?
 
     func makeCoordinator() -> ImageCaptureViewCoordinator {
@@ -37,10 +37,10 @@ class ImageCaptureViewCoordinator:
     UINavigationControllerDelegate,
     UIImagePickerControllerDelegate
 {
-    @Binding var isCoordinatorShown: NewItemView.ActiveSheet?
+    @Binding var isCoordinatorShown: ItemEditFormView.ActiveSheet?
     @Binding var imageInCoordinator: Data?
 
-    init(isShown: Binding<NewItemView.ActiveSheet?>, image: Binding<Data?>) {
+    init(isShown: Binding<ItemEditFormView.ActiveSheet?>, image: Binding<Data?>) {
         _isCoordinatorShown = isShown
         _imageInCoordinator = image
     }

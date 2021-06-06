@@ -22,8 +22,8 @@
 		917CB1A426480BB00081644F /* ItemsByGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917CB18C26480BAF0081644F /* ItemsByGroupView.swift */; };
 		917CB1A526480BB00081644F /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917CB18D26480BAF0081644F /* Persistence.swift */; };
 		917CB1A626480BB00081644F /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917CB18D26480BAF0081644F /* Persistence.swift */; };
-		917CB1B226487BF20081644F /* NewItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917CB1B126487BF20081644F /* NewItemView.swift */; };
-		917CB1B326487BF20081644F /* NewItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917CB1B126487BF20081644F /* NewItemView.swift */; };
+		917CB1B226487BF20081644F /* ItemEditFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917CB1B126487BF20081644F /* ItemEditFormView.swift */; };
+		917CB1B326487BF20081644F /* ItemEditFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917CB1B126487BF20081644F /* ItemEditFormView.swift */; };
 		917CB1B8264882BC0081644F /* AllItemsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917CB1B7264882BC0081644F /* AllItemsView.swift */; };
 		917CB1B9264882BC0081644F /* AllItemsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917CB1B7264882BC0081644F /* AllItemsView.swift */; };
 		917CB1BE26489D0E0081644F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 917CB1BD26489D0E0081644F /* Assets.xcassets */; };
@@ -54,7 +54,7 @@
 		917CB19B26480BB00081644F /* Inventauri.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Inventauri.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		917CB19D26480BB00081644F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		917CB19E26480BB00081644F /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
-		917CB1B126487BF20081644F /* NewItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewItemView.swift; sourceTree = "<group>"; };
+		917CB1B126487BF20081644F /* ItemEditFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemEditFormView.swift; sourceTree = "<group>"; };
 		917CB1B7264882BC0081644F /* AllItemsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllItemsView.swift; sourceTree = "<group>"; };
 		917CB1BD26489D0E0081644F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		917CB1C02648AF7A0081644F /* Item+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Item+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -92,7 +92,7 @@
 				917CB18C26480BAF0081644F /* ItemsByGroupView.swift */,
 				9156C5C1264B257800E06E8E /* ItemView.swift */,
 				9156C5BE264B255700E06E8E /* ContainerView.swift */,
-				917CB1B126487BF20081644F /* NewItemView.swift */,
+				917CB1B126487BF20081644F /* ItemEditFormView.swift */,
 				917CB1B7264882BC0081644F /* AllItemsView.swift */,
 				91C1BBD92659CBF10064491E /* RoundedCorners.swift */,
 				91C1BBD62659CA330064491E /* GridHeaderFooter.swift */,
@@ -282,7 +282,7 @@
 				917CB19F26480BB00081644F /* Inventauri.xcdatamodeld in Sources */,
 				917CB1A326480BB00081644F /* ItemsByGroupView.swift in Sources */,
 				9156C5C2264B257800E06E8E /* ItemView.swift in Sources */,
-				917CB1B226487BF20081644F /* NewItemView.swift in Sources */,
+				917CB1B226487BF20081644F /* ItemEditFormView.swift in Sources */,
 				917CB1C42648AF7A0081644F /* Item+CoreDataProperties.swift in Sources */,
 				91C1BBDA2659CBF20064491E /* RoundedCorners.swift in Sources */,
 				917CB1C22648AF7A0081644F /* Item+CoreDataClass.swift in Sources */,
@@ -302,7 +302,7 @@
 				917CB1A026480BB00081644F /* Inventauri.xcdatamodeld in Sources */,
 				917CB1A426480BB00081644F /* ItemsByGroupView.swift in Sources */,
 				9156C5C3264B257800E06E8E /* ItemView.swift in Sources */,
-				917CB1B326487BF20081644F /* NewItemView.swift in Sources */,
+				917CB1B326487BF20081644F /* ItemEditFormView.swift in Sources */,
 				917CB1C52648AF7A0081644F /* Item+CoreDataProperties.swift in Sources */,
 				917CB1C32648AF7A0081644F /* Item+CoreDataClass.swift in Sources */,
 				91C1BBDB2659CBF20064491E /* RoundedCorners.swift in Sources */,

@@ -1,5 +1,5 @@
 //
-//  NewItemView.swift
+//  ItemEditFormView.swift
 //  Inventauri
 //
 //  Created by Daniel Marriner on 09/05/2021.
@@ -9,7 +9,7 @@ import SwiftUI
 import CoreData
 import Introspect
 
-struct NewItemView: View {
+struct ItemEditFormView: View {
     enum ActiveSheet: Identifiable {
         case picker, camera
 
@@ -197,7 +197,7 @@ struct NewItemView_Previews: PreviewProvider {
         let item = Item(context: context)
         item.parent = base
         item.timestamp = Date()
-        return NewItemView(creatingItem: item, withParentId: base.id!)
+        return ItemEditFormView(creatingItem: item, withParentId: base.id!)
             .environment(\.managedObjectContext, context)
     }
 }
